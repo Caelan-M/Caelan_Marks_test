@@ -9,9 +9,9 @@ def overlap(line1, line2):
     if line1[0] < line2[0]:
         if line1[1] > line2[0]:
             return True
-    else:
-        if line2[1] > line1[0]:
-            return True
+    elif line2[1] > line1[0]:
+        return True
+
     return False
 
 
