@@ -29,6 +29,7 @@ for test in test_cases:
     if overlap(test[0], test[1]) != test[2]:
         print('Test fail, case: ' + str(test))
         test_pass = False
+        break
 
 if test_pass:
     print('All tests pass!')
