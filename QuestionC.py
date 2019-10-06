@@ -39,11 +39,12 @@ class LRU(object):
             else:
                 break
 
+        # if there is room left over, add new data else remove oldest data and add new data
         if len(self.dataset) < self.num_slots:
             self.dataset.append([time.time(), data_id, data])
         else:
-            # TODO: Start to replace in LRU fashion, unless there are expired places to use first
-            pass
+            del self.dataset[0]
+            self.dataset.append([time.time(), data_id, data])
 
     def read(self, data_id):
         # Look for data in local cache, starting at most recently used
