@@ -1,3 +1,7 @@
 .DS_Store
 /venv/*
 .idea*
+/North America/*
+/Europe/*
+/Africa/*
+/Latin America/*
