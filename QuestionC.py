@@ -26,14 +26,17 @@ class LRU(object):
     dataset = []
 
     def __init__(self, region, num_slots=1, time_to_expiry=300, region_list=[]):
+        # Instantiate with desired parameters
         self.num_slots = num_slots
         self.time_to_expiry = time_to_expiry
         self.region = region
         self.dataset = []
 
+        # Create directory for local data
         if not os.path.exists(self.region):
             os.makedirs(self.region)
 
+        # Make sure that region knows about other regions
         self.region_list = region_list
         self.synchronize()
 
@@ -54,6 +57,7 @@ class LRU(object):
             del self.dataset[0]
             self.dataset.append([time.time(), data_id, data])
 
+        # Save data to database, to not lose in crash
         file = open(self.region + '/' + str(data_id) + '.txt', 'w')
         file.write(str(data))
 
@@ -83,18 +87,18 @@ class LRU(object):
                 return temp[2]
 
         # Look for file in local region
-        # if os.path.exists(self.region + '/' + str(data_id) + '.txt'):
-        #     file = open(self.region + '/' + str(data_id) + '.txt', 'r')
-        #     data = file.read()
-        #
-        #     # Add to cache
-        #     if len(self.dataset) < self.num_slots:
-        #         self.dataset.append([time.time(), data_id, data])
-        #     else:
-        #         del self.dataset[0]
-        #         self.dataset.append([time.time(), data_id, data])
-        #
-        #     return data
+        if os.path.exists(self.region + '/' + str(data_id) + '.txt'):
+            file = open(self.region + '/' + str(data_id) + '.txt', 'r')
+            data = file.read()
+
+            # Add to cache
+            if len(self.dataset) < self.num_slots:
+                self.dataset.append([time.time(), data_id, data])
+            else:
+                del self.dataset[0]
+                self.dataset.append([time.time(), data_id, data])
+
+            return data
 
         # Look in the databases of all the other regions
         for region in self.region_list:
@@ -111,48 +115,42 @@ class LRU(object):
 
                 return data
 
+        # Shouldn't ever get here
         return print('File not found!')
 
     def add_new_region(self, region):
+        # Make sure new region knows about existing regions
         temp_region_list = self.region_list.copy()
         temp_region_list.append(self)
         new_region = LRU(region=region, num_slots=self.num_slots, time_to_expiry=self.time_to_expiry,
                          region_list=temp_region_list)
 
+        # Make sure existing regions know about new region
         for other_region in self.region_list.copy():
             other_region.add_to_region_list(new_region)
 
+        # Let this object know about new region
         self.region_list.append(new_region)
 
         return new_region
 
+    # Add region to region list
     def add_to_region_list(self, region):
         self.region_list.append(region)
 
+    # Make sure that data is the same across regions, this is called when a region is first created or it is created
+    # again after a crash
     def synchronize(self):
+        # Get data from all regions
         for region in self.region_list:
-            for file_name in os.path(region.region): # TODO: Figure out how to do this
-                file = open(self.region.region + '/' + file_name, 'r')
+            # Get all data from all regions
+            for file_name in os.listdir(region.region):
+                # Get data
+                file = open(region.region + '/' + file_name, 'r')
                 data = file.read()
-            file.write(str(data))
+                file.close()
 
-# TODO: After crash recovery, literally just del and reinstantiate with same name
-
-geo_lru = LRU(region='North America', num_slots=10, time_to_expiry=1)
-
-geo_lru.write(100, 0)
-
-eu_lru = geo_lru.add_new_region('Europe')
-
-la_lru = geo_lru.add_new_region('Latin America')
-
-af_lru = geo_lru.add_new_region('Africa')
-
-
-for j in range(0, 11):
-    time.sleep(0.3)
-    geo_lru.write(j, j*10 + 5)
-
-read_data = geo_lru.read(0)
-
-hi = 1
+                # Save data
+                new_file = open(self.region + '/' + file_name, 'w')
+                new_file.write(str(data))
+                new_file.close()
