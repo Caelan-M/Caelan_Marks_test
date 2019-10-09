@@ -1,11 +1,11 @@
 Question C:
 
 # The structure of the cache is such that the least recently used cache is always at index 0 and the most recently used
-# is at the highest index that you have specific through the number of slots. Whenever a block of data is read, it will
-# be sent to the top of the list and the time to expiry updated. I think that I've implemented all the requirements
+# is at the highest index that you have specified through the number of slots. Whenever a block of data is read, it will
+# be sent to the top of the list and the time to expire will be updated. I think that I've implemented all the requirements
 # except flexible schema which is a concept that I am unfamiliar with. As well, while my code is likely to work in
 # a sequential environment, it does not consider a lot of the real life problems that would occur when events are
-# occurring in parallel in different environments
+# occurring in parallel in different regions.
 
 You can instantiate an LRU cache with the following line of code:
 
@@ -30,7 +30,7 @@ na_lru.write(100, 0)
 # Where the first argument is the name of the data and the second argument is the data itself
 # When written the data will be stored into cache, then stored as a local file and then sent to every other
 # region for them to store as well. Each time you write, the cache will check for any expired blocks and remove them.
-# If the cache is full of blocks that have yet to expire, the least recently used will be removed and the new data
+# If the cache is full of blocks that have yet to expire, the least recently used block will be removed and the new data
 # written to the top of the cache list.
 
 You can read in the following manner:
