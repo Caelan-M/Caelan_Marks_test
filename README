@@ -1,0 +1,43 @@
+Question C:
+
+# The structure of the cache is such that the least recently used cache is always at index 0 and the most recently used
+# is at the highest index that you have specific through the number of slots. Whenever a block of data is read, it will
+# be sent to the top of the list and the time to expiry updated. I think that I've implemented all the requirements
+# except flexible schema which is a concept that I am unfamiliar with. As well, while my code is likely to work in
+# a sequential environment, it does not consider a lot of the real life problems that would occur when events are
+# occurring in parallel in different environments
+
+You can instantiate an LRU cache with the following line of code:
+
+na_lru = LRU(region='North America', num_slots=10, time_to_expiry=1)
+
+# Where the first argument is the region name, the second is the number of cache slots available
+# and the 3rd is the time before the cache expires in seconds and the return object is the created region.
+# When you create a new region it will automatically create a directory of the same name where data is stored long term.
+
+You can add an additional region using a command like this:
+
+eu_lru = geo_lru.add_new_region('Europe')
+
+# Where the argument is the name of the new region and the return value is the object associated with this new region
+# When you create new region it will automatically synchronize its dataset with the other regions to ensure that it
+# has all the same data stored long term locally.
+
+You can write to a given region using:
+
+na_lru.write(100, 0)
+
+# Where the first argument is the name of the data and the second argument is the data itself
+# When written the data will be stored into cache, then stored as a local file and then sent to every other
+# region for them to store as well. Each time you write, the cache will check for any expired blocks and remove them.
+# If the cache is full of blocks that have yet to expire, the least recently used will be removed and the new data
+# written to the top of the cache list.
+
+You can read in the following manner:
+
+na_data = geo_lru.read(100)
+
+# Where the argument is the id of the data that you would like to read and then the return value is that data that was
+# read. When reading, first the local cache is checked, first looking at the most recently used and working its way down.
+# If the data is not found in the cache, then it is looked for in the local region directory. If again it is not found
+# there, then it will be searched for in the directories of the other regions.

@@ -43,8 +43,7 @@ class LRU(object):
     def write(self, data_id, data, local_region=True):
         # Remove expired cached data
         for i in range(len(self.dataset)):
-            # Check if expired, if reached expired data, if reach data thats not expired, break cause rest of data
-            # isn't expired
+            # Check if data is expired, if reach data that's not expired break cause the rest of data isn't expired
             if self.dataset[i][0] + self.time_to_expiry < time.time():
                 del self.dataset[i]
             else:
